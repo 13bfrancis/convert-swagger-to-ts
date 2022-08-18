@@ -1,15 +1,21 @@
 #!/usr/bin/env node
 import axios from "axios";
 import fs from "fs";
+import prettier from "prettier";
+import { program } from "commander";
+
+program.option("-p, --path <string>");
+
+program.parse();
+
+const options = program.opts();
 
 const generateType = ({ name, schema }) => {
   const convertTypes = (type, currProp) => {
-    console.log(type);
     if (type.includes("#")) {
       return `${type.split("/schemas/")[1]}`;
     }
     if (type === "integer") return "number";
-    console.log({ currProp });
     if (type === "array") {
       if ("$ref" in currProp.items) {
         return `${currProp.items["$ref"].split("/schemas/")[1]}[]`;
@@ -39,15 +45,24 @@ const generateType = ({ name, schema }) => {
   }
   `;
 };
-(async () => {
-  const rawData = fs.readFileSync("openapi.json") as unknown as string;
-  const jsonData = JSON.parse(rawData);
 
-  const schemas = jsonData.components.schemas;
+(async () => {
+  const swaggerData = await axios.get(options.path);
+
+  const schemas = swaggerData.data.components.schemas;
 
   const typesFileContent = Object.keys(schemas).reduce((prev, curr) => {
     return prev + generateType({ name: curr, schema: schemas[curr] });
   }, "");
 
-  fs.writeFileSync("test.ts", typesFileContent);
+  const finalData = prettier.format(
+    `// This file is auto-generated (do not modify) ${typesFileContent}`,
+    {
+      parser: "babel",
+    }
+  );
+
+  console.log({ options });
+
+  fs.writeFileSync("test.ts", finalData);
 })();
