@@ -1,0 +1,21 @@
+{
+  "name": "convert-swagger-to-ts",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "prepublish": "npm run build"
+  },
+  "bin": {
+    "convert-swagger-to-ts": "dist/index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.7.6",
+    "axios": "^0.27.2",
+    "typescript": "^4.7.4"
+  }
+}
